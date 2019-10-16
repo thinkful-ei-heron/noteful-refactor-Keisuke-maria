@@ -5,7 +5,6 @@ import NoteListNav from '../NoteListNav/NoteListNav';
 import NotePageNav from '../NotePageNav/NotePageNav';
 import NoteListMain from '../NoteListMain/NoteListMain';
 import NotePageMain from '../NotePageMain/NotePageMain';
-import dummyStore from '../dummy-store';
 import {getNotesForFolder, findNote, findFolder} from '../notes-helpers';
 import NotefulContext from '../NotefulContext';
 import './App.css';
@@ -16,11 +15,43 @@ class App extends Component {
         folders: []
     };
 
-
+    deleteNote = noteId => {
+        const newNotes = this.state.notes.filter(note => note.id !== noteId)
+        this.setState({notes: newNotes})
+    }
 
     componentDidMount() {
+        fetch('http://www.localhost:9090/folders')
+        .then(response => {
+            if(!response.ok){
+                throw new Error('ahhhh')
+            }
+            return response
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.setState({folders: data})
+        })
+        .catch(error => {
+            console.log('error handling ', error)
+        })
+
+        fetch('http://www.localhost:9090/notes')
+        .then(response => {
+            if(!response.ok){
+                throw new Error('ahhhh')
+            }
+            return response
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.setState({notes: data})
+        })
+        .catch(error => {
+            console.log('error handling ', error)
+        })
         // fake date loading from API call
-        setTimeout(() => this.setState(dummyStore), 600);
+        //setTimeout(() => this.setState(dummyStore), 600);
     }
 
     renderNavRoutes() {
@@ -63,7 +94,8 @@ class App extends Component {
     renderMainRoutes() {
         const contextValue = {
             notes: this.state.notes,
-            folders: this.state.folders
+            folders: this.state.folders,
+            deleteNote: this.deleteNote
         }
         return (
             <NotefulContext.Provider value={contextValue}>
